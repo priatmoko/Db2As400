@@ -113,7 +113,17 @@ class Db2{
      */
     private function odbc()
     {
-        $this->con = "odbc";
+        try{
+            $dsn="Driver={iSeries Access ODBC Driver};system=".$this->host.";";
+            $con = odbc_connect($dsn, $this->username, $this->password);
+            $this->con=$con;
+        }catch(\Exception $e){
+            $errors=['error_code'=>$e->getCode(),
+                'error_msg'=>strip_tags($e->getMessage())];
+            echo json_encode($errors, true);    
+            die();
+        }
+        
     } 
 
     public function execute($sql)
@@ -138,6 +148,19 @@ class Db2{
             die();    
         }
 
+    }
+
+    private function execute_odbc($sql){
+        try {
+            $row = odbc_exec($this->con, $sql);
+            $this->records=$row;
+        }catch(\Exception $e){
+            $errors=['error_code'=>$e->getCode(),
+                'error_msg'=>strip_tags($e->getMessage()),
+                'query'=>$sql];
+            echo json_encode($errors, true);    
+            die();    
+        }
     }
 
     private function setColumns($obj){
@@ -168,6 +191,7 @@ class Db2{
         return false;
     }
     private function getlist_com(){
+        
         if (is_object($this->records)){
             $rs = $this->records;
             $col = $this->columns;
@@ -175,7 +199,7 @@ class Db2{
                 if (is_array($col) && count($col)>0){
                     for($i=0;$i<count($col); $i++){
                         
-                        $result[$col[$i]] = $rs[$col[$i]]->value."";
+                        $result[$col[$i]] = trim($rs[$col[$i]]->value."");
                     }
                     if (isset($result)){
                         $results[] = $result;
@@ -188,6 +212,26 @@ class Db2{
         }
         return false;
     }
+
+    private function getlist_odbc(){
+        
+        if (!is_null($this->records)){
+            $rs = $this->records;
+            while(odbc_fetch_row($rs)){
+                for ($i = 1; $i <= odbc_num_fields($rs); $i++){
+                    $field = odbc_field_name($rs, $i);
+                    $result[$field] = trim(odbc_result($rs, $field))."";
+                }
+                if (isset($result)){
+                    $results[] = $result;
+                    unset($result);
+                }
+            }
+            if (isset($results)) return $results;
+        }
+        return false;
+    }
+
     private function getrow_com(){
         if (is_object($this->records)){
             $rs = $this->records;
@@ -197,6 +241,21 @@ class Db2{
                     for($i=0;$i<count($col); $i++){
                         $result[$col[$i]] = $rs[$col[$i]]->value."";
                     }
+                }
+            }
+            if (isset($result)) return $result;
+        }
+        return false;
+    }
+    
+    private function getrow_odbc(){
+        
+        if (!is_null($this->records)){
+            $rs = $this->records;
+            if(odbc_fetch_row($rs)){
+                for ($i = 1; $i <= odbc_num_fields($rs); $i++){
+                    $field = odbc_field_name($rs, $i);
+                    $result[$field] = trim(odbc_result($rs, $field))."";
                 }
             }
             if (isset($result)) return $result;
