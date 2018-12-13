@@ -2,6 +2,7 @@
     "name": "masterpis/db2as400",
     "description": "Package for db2 as400 connection. Connection based on general connection string com and odbc",
     "type": "library",
+    "license": "no-licence",
     "authors": [
         {
             "name": "Priatmoko",
@@ -9,5 +10,12 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {}
+    "require": {
+        "php": ">=7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Masterpis\\Db2As400\\": "src"
+        }
+    }
 }
