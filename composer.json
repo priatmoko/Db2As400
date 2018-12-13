@@ -2,7 +2,7 @@
     "name": "masterpis/db2as400",
     "description": "Package for db2 as400 connection. Connection based on general connection string com and odbc",
     "type": "library",
-    "license": "no-licence",
+    "license": "",
     "authors": [
         {
             "name": "Priatmoko",
