@@ -2,6 +2,23 @@
 
 namespace Masterpis\Db2as400;
 
+/**
+ * Db2As400 is a collection of attributes and methods to simplify connection to DB2 As400.
+ * The main purpose of this library is standarization of code in my small organization. 
+ * It will provide basic operation of database connection
+ * 
+ * This library is built on lumen, laravel
+ * 
+ * Class Db2 provide instance methods to connect database Db2 AS400, driver selection, method compatible with driver
+ * Using this library will make you use same name method to operate connection and query.
+ * 
+ * 
+ * @link masterpis.com
+ * @since v1.0.0
+ * @author Priatmoko <priatmoko.informatics@gmail.com>
+ * 
+ */
+
 class Db2{
 
     /**
@@ -163,9 +180,9 @@ class Db2{
      * @param string $sql
      * @return void
      */
-    public function execute($sql)
+    public function query($sql)
     {
-        if (env('DB2_DRIVER')!="" && method_exists($this, "exec".ucfirst(strtolower(env('DB2_DRIVER'))))){
+        if (env('DB2_DRIVER')!="" && method_exists($this, "execute".ucfirst(strtolower(env('DB2_DRIVER'))))){
             $method = "exec".ucfirst(strtolower(env('DB2_DRIVER')));
             $this->$method($sql);
         }
@@ -176,7 +193,7 @@ class Db2{
      * @param string $sql
      * @return void
      */
-    private function execCom($sql)
+    private function executeCom($sql)
     {
         try {
             $row = $this->con->execute($sql);
@@ -196,7 +213,7 @@ class Db2{
      * @param string $sql
      * @return void
      */
-    private function execOdbc($sql)
+    private function executeOdbc($sql)
     {
         try {
             $row = odbc_exec($this->con, $sql);
