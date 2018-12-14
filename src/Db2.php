@@ -5,22 +5,46 @@ namespace Masterpis\Db2as400;
 class Db2{
 
     /**
-     * Db2 params
-     * $con         : parameter for recording object initialization of connection
-     * $host        : IP Address of server Db2 As400
-     * $username    : user of database Db2 As400
-     * $password    : user password of database Db2 As400
-     * $catalog     : catalog name of Db2 As400 (you can find this catalog on i series navigator ex. S651658f)
-     * $columns     : parameter for recording object array list of column of query select
-     *  $records    : parameter for recording row result of query 
+     * The registered connection
+     * @var object of connection
      */
 
     private $con;
+
+    /**
+     * The registered host database, IP Address of server database Db2 As400 (RDBMS)
+     * @var string
+     */
     private $host;
+
+    /**
+     * The registered username of database Db2 As400 (RDBMS)
+     * @var string
+     */
     private $username;
+
+    /**
+     * The registered password of database Db2 As400 (RDBMS)
+     * @var string
+     */
     private $password;
+
+    /**
+     * The registered catalog of database Db2 As400 (RDBMS). It is only exist on driver COM driver
+     * @var string
+     */
     private $catalog;
+
+    /**
+     * The registed column of Assigned table Db2 As400 (RDBMS)
+     * @var array 
+     */
     private $columns;
+
+    /**
+     * The retrieved records of table Db2 As400 (RDBMS)
+     * @var object of records
+     */
     private $records;
 
     /**
@@ -36,6 +60,12 @@ class Db2{
      * Ex. 192.168.1.1 has user name user1 and password passwd1
      * If you want to use first env, you can pass $env = 0 Ex. $con = new Db2(0);
      * But if you only have one env you dont need to separate using char "|" and you dont neet to pass $env, just let it blank
+     */
+
+    /**
+     * Create a new Db2 instance
+     * @param int $env (index of array env configuration, 0,1..)
+     * @return void
      */
     public function __construct($env=NULL)
     {
@@ -91,7 +121,8 @@ class Db2{
     }
 
     /**
-     * Db2 As400 connection using con dot net driver
+     * Create instance of Db2 As400 connection using COM DOT NET driver
+     * @return void
      */
     private function com()
     {
@@ -109,7 +140,8 @@ class Db2{
     }
 
     /**
-     * Db2 As400 connection using odbc driver
+     * Create instance of Db2 As400 connection using ODBC driver
+     * @return void
      */
     private function odbc()
     {
@@ -126,16 +158,26 @@ class Db2{
         
     } 
 
+    /**
+     * Choose method for query execution, COM driver method or odbc method
+     * @param string $sql
+     * @return void
+     */
     public function execute($sql)
     {
-        if (env('DB2_DRIVER')!="" && method_exists($this, strtolower("execute_".env('DB2_DRIVER')))){
-            $method = strtolower("execute_".env('DB2_DRIVER'));
+        if (env('DB2_DRIVER')!="" && method_exists($this, "exec".ucfirst(strtolower(env('DB2_DRIVER'))))){
+            $method = "exec".ucfirst(strtolower(env('DB2_DRIVER')));
             $this->$method($sql);
         }
     }
 
-    private function execute_com($sql){
-
+    /**
+     * Execute query with COM driver
+     * @param string $sql
+     * @return void
+     */
+    private function execCom($sql)
+    {
         try {
             $row = $this->con->execute($sql);
             $this->setColumns($row);
@@ -147,10 +189,15 @@ class Db2{
             echo json_encode($errors, true);    
             die();    
         }
-
     }
 
-    private function execute_odbc($sql){
+    /**
+     * Execute query with ODBC driver
+     * @param string $sql
+     * @return void
+     */
+    private function execOdbc($sql)
+    {
         try {
             $row = odbc_exec($this->con, $sql);
             $this->records=$row;
@@ -163,42 +210,79 @@ class Db2{
         }
     }
 
-    private function setColumns($obj){
+    /**
+     * Set / Register column of executed query
+     * @param mixed $obj
+     * @return void
+     */
+    private function setColumns($obj)
+    {
         $number_of_column=$obj->fields->count();
         for ($i=0; $i<$number_of_column; $i++){
             $field[$i] = $obj->fields($i)->name;
         }
         if (isset($field)) $this->columns = $field;
     }
-    public function getColumn(){
+
+    /**
+     * get column of executed query
+     * @return array
+     */
+    public function getColumn()
+    {
         return $this->columns;
     }
-    public function getRecords(){
+
+    /**
+     * get records of executed query
+     * @return mixed
+     */
+    public function getRecords()
+    {
         return $this->records;
     }
-    public function getList(){
-        if (env('DB2_DRIVER')!="" && method_exists($this, strtolower("getList_".env('DB2_DRIVER')))){
-            $method = strtolower("getList_".env('DB2_DRIVER'));
+
+    /**
+     * choose get list array of executed query using COM method or ODBC method 
+     * @return array
+     * @return false
+     */
+    public function get()
+    {
+        if (env('DB2_DRIVER')!="" && method_exists($this, "get".ucfirst(strtolower(env('DB2_DRIVER'))))){
+            $method = "get".ucfirst(strtolower(env('DB2_DRIVER')));
             return $this->$method();
         }       
         return false;
     }
-    public function getRow(){
-        if (env('DB2_DRIVER')!="" && method_exists($this, strtolower("getRow_".env('DB2_DRIVER')))){
-            $method = strtolower("getRow_".env('DB2_DRIVER'));
+
+    /**
+     * choose get single array of executed query using COM method or ODBC method 
+     * @return array
+     * @return false
+     */
+    public function first()
+    {
+        if (env('DB2_DRIVER')!="" && method_exists($this, "first".ucfirst(strtolower(env('DB2_DRIVER'))))){
+            $method = "first".ucfirst(strtolower(env('DB2_DRIVER')));
             return $this->$method();
         }       
         return false;
     }
-    private function getlist_com(){
-        
+
+    /**
+     * Get list array of executed query using COM method 
+     * @return array
+     * @return false
+     */
+    private function getCom()
+    {
         if (is_object($this->records)){
             $rs = $this->records;
             $col = $this->columns;
             while(!$rs->EOF){
                 if (is_array($col) && count($col)>0){
                     for($i=0;$i<count($col); $i++){
-                        
                         $result[$col[$i]] = trim($rs[$col[$i]]->value."");
                     }
                     if (isset($result)){
@@ -213,8 +297,13 @@ class Db2{
         return false;
     }
 
-    private function getlist_odbc(){
-        
+    /**
+     * Get list array of executed query using ODBC method 
+     * @return array
+     * @return false
+     */
+    private function getOdbc()
+    {
         if (!is_null($this->records)){
             $rs = $this->records;
             while(odbc_fetch_row($rs)){
@@ -232,7 +321,13 @@ class Db2{
         return false;
     }
 
-    private function getrow_com(){
+    /**
+     * Get single array of executed query using COM method 
+     * @return array
+     * @return false
+     */
+    private function firstCom()
+    {
         if (is_object($this->records)){
             $rs = $this->records;
             $col = $this->columns;
@@ -248,7 +343,13 @@ class Db2{
         return false;
     }
     
-    private function getrow_odbc(){
+    /**
+     * Get single array of executed query using ODBC method 
+     * @return array
+     * @return false
+     */
+    private function firstOdbc()
+    {
         
         if (!is_null($this->records)){
             $rs = $this->records;
