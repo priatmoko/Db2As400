@@ -140,10 +140,12 @@ class Model extends Db2
 
     /**
      * The query clause where
-     * @param array
+     * @param array $where
      * Simple clause where ex. ["field"=>"keyword"]
      * Complex clause on where ex 
      * [""=>"(field1='".$keyword1."' or field2='".$keyword2."') and field2 like '%".keyword3."%'"]
+     * @param string $console
+     * NULL, CONSOLE will display query generated, ASPARAM will assign query to var $query
      * @return void 
      */
     public function where($where=NULL, $console=NULL)
@@ -197,11 +199,11 @@ class Model extends Db2
         $sql="select ".$fields." from ".$this->table." ".$filter." ".$order." ".$limit;
 
         if (strtoupper($console)=='CONSOLE'){
-            return $sql;
+            dd($sql);
         }else if (strtoupper($console)=='ASPARAM'){
             $this->query=$sql;
         }else{
-            return $this->query($sql);
+            $this->query($sql);
         }
     }
 
