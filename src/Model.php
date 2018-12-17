@@ -68,11 +68,12 @@ class Model extends Db2
 
     /**
      * Instance object Model for generating simple query
+     * @param int $env
      * @return void
      */
-    public function __construct()
+    public function __construct($env=NULL)
     {
-        parent::__construct();
+        parent::__construct($env);
         $this->where(NULL, 'ASPARAM');
     }
 
@@ -131,11 +132,11 @@ class Model extends Db2
 
     /**
      * The user in charge. Registered user running commands
-     * @param @array
+     * @param string
      * @return void
      */
-    public function setUsid($usid){
-        $this->usid=$usid;
+    public function setUser($user){
+        $this->user=$user;
     }
 
     /**
