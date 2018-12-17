@@ -1,8 +1,8 @@
 <?php 
 
-namespace Masterpis\Db2As400;
+namespace Masterpis\Db2as400;
 
-use Masterpis\Db2As400\Db2;
+use Masterpis\Db2as400\Db2;
 
 /**
  * Db2As400 is a collection of attributes and methods to simplify connection to DB2 As400.
@@ -61,12 +61,19 @@ class Model extends Db2
     protected $user;
     
     /**
+     * generated Query
+     * @var string
+     */
+    public $query;
+
+    /**
      * Instance object Model for generating simple query
      * @return void
      */
     public function __construct()
     {
-        //
+        parent::__construct();
+        $this->where(NULL, 'ASPARAM');
     }
 
     /**
@@ -160,6 +167,10 @@ class Model extends Db2
             }
         }
         
+        //Combine all filter 
+        $filter = "";
+        if (isset($pf) && count($pf)>0)  $filter = " where ".implode(" and ", $pf); 
+        
         //Looping array order clause
         $order = "";
         if (is_array($this->order) && count($this->order)>0){
@@ -187,6 +198,8 @@ class Model extends Db2
 
         if (strtoupper($console)=='CONSOLE'){
             return $sql;
+        }else if (strtoupper($console)=='ASPARAM'){
+            $this->query=$sql;
         }else{
             return $this->query($sql);
         }

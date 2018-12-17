@@ -26,43 +26,43 @@ class Db2{
      * @var object of connection
      */
 
-    private $con;
+    protected $con;
 
     /**
      * The registered host database, IP Address of server database Db2 As400 (RDBMS)
      * @var string
      */
-    private $host;
+    protected $host;
 
     /**
      * The registered username of database Db2 As400 (RDBMS)
      * @var string
      */
-    private $username;
+    protected $username;
 
     /**
      * The registered password of database Db2 As400 (RDBMS)
      * @var string
      */
-    private $password;
+    protected $password;
 
     /**
      * The registered catalog of database Db2 As400 (RDBMS). It is only exist on driver COM driver
      * @var string
      */
-    private $catalog;
+    protected $catalog;
 
     /**
      * The registed column of Assigned table Db2 As400 (RDBMS)
      * @var array 
      */
-    private $columns;
+    protected $columns;
 
     /**
      * The retrieved records of table Db2 As400 (RDBMS)
      * @var object of records
      */
-    private $records;
+    protected $records;
 
     /**
      * Initialization method
@@ -141,7 +141,7 @@ class Db2{
      * Create instance of Db2 As400 connection using COM DOT NET driver
      * @return void
      */
-    private function com()
+    protected function com()
     {
         try{
             $this->con = new \COM('ADODB.Connection');
@@ -160,7 +160,7 @@ class Db2{
      * Create instance of Db2 As400 connection using ODBC driver
      * @return void
      */
-    private function odbc()
+    protected function odbc()
     {
         try{
             $dsn="Driver={iSeries Access ODBC Driver};system=".$this->host.";";
@@ -183,7 +183,7 @@ class Db2{
     public function query($sql)
     {
         if (env('DB2_DRIVER')!="" && method_exists($this, "execute".ucfirst(strtolower(env('DB2_DRIVER'))))){
-            $method = "exec".ucfirst(strtolower(env('DB2_DRIVER')));
+            $method = "execute".ucfirst(strtolower(env('DB2_DRIVER')));
             $this->$method($sql);
         }
     }
@@ -193,7 +193,7 @@ class Db2{
      * @param string $sql
      * @return void
      */
-    private function executeCom($sql)
+    protected function executeCom($sql)
     {
         try {
             $row = $this->con->execute($sql);
@@ -213,7 +213,7 @@ class Db2{
      * @param string $sql
      * @return void
      */
-    private function executeOdbc($sql)
+    protected function executeOdbc($sql)
     {
         try {
             $row = odbc_exec($this->con, $sql);
@@ -232,7 +232,7 @@ class Db2{
      * @param mixed $obj
      * @return void
      */
-    private function setColumns($obj)
+    protected function setColumns($obj)
     {
         $number_of_column=$obj->fields->count();
         for ($i=0; $i<$number_of_column; $i++){
@@ -292,8 +292,9 @@ class Db2{
      * @return array
      * @return false
      */
-    private function getCom()
+    protected function getCom()
     {
+        if (!is_object($this->records)) $this->query($this->query);
         if (is_object($this->records)){
             $rs = $this->records;
             $col = $this->columns;
@@ -319,8 +320,9 @@ class Db2{
      * @return array
      * @return false
      */
-    private function getOdbc()
+    protected function getOdbc()
     {
+        if (is_null($this->records)) $this->query($this->query);
         if (!is_null($this->records)){
             $rs = $this->records;
             while(odbc_fetch_row($rs)){
@@ -343,8 +345,9 @@ class Db2{
      * @return array
      * @return false
      */
-    private function firstCom()
+    protected function firstCom()
     {
+        if (!is_object($this->records)) $this->query($this->query);
         if (is_object($this->records)){
             $rs = $this->records;
             $col = $this->columns;
@@ -365,9 +368,9 @@ class Db2{
      * @return array
      * @return false
      */
-    private function firstOdbc()
+    protected function firstOdbc()
     {
-        
+        if (is_null($this->records)) $this->query($this->query);
         if (!is_null($this->records)){
             $rs = $this->records;
             if(odbc_fetch_row($rs)){
