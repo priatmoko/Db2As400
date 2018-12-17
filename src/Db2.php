@@ -92,8 +92,8 @@ class Db2{
             if (strpos($hosts, '|')==true){
                 $h = explode('|', $hosts);
                 if ($env!=NULL && is_numeric($env) && $env<=count($h) &&  
-                    is_array($h) && count($h)>0) $this->host = $h[int($env)-1];
-                else $this->host= $hosts;
+                    is_array($h) && count($h)>0) $this->host = $h[$env];
+                else $this->host= $h[0];
             }else{
                 $this->host = $hosts;
             }
@@ -106,8 +106,8 @@ class Db2{
             if (strpos($username, '|')==true){
                 $u = explode('|', $username);
                 if ($env!=NULL && is_numeric($env) && $env<=count($u) &&  
-                    is_array($u) && count($u)>0) $this->username = $u[int($env)-1];
-                else $this->username= $username;
+                    is_array($u) && count($u)>0) $this->username = $u[$env];
+                else $this->username= $u[0];
             }else{
                 $this->username = $username;
             }
@@ -118,8 +118,8 @@ class Db2{
             if (strpos($password, '|')==true){
                 $p = explode('|', $password);
                 if ($env!=NULL && is_numeric($env) && $env<=count($p) &&  
-                    is_array($p) && count($p)>0) $this->password = $p[int($env)-1];
-                else $this->password= $password;
+                    is_array($p) && count($p)>0) $this->password = $p[$env];
+                else $this->password= $p[0];
             }else{
                 $this->password = $password;
             }
@@ -127,8 +127,18 @@ class Db2{
 
         //Assign catalog from env
         if (env('DB2_CATALOG')!=''){
-            $this->catalog=env('DB2_CATALOG');
-        }    
+            $catalog = env('DB2_CATALOG');
+            if (strpos($catalog, '|')==true){
+                $c = explode('|', $catalog);
+                if ($env!=NULL && is_numeric($env) && $env<=count($c) &&  
+                    is_array($c) && count($c)>0) $this->catalog = $c[$env];
+                else $this->catalog= $c[0];
+            }else{
+                $this->catalog = $catalog;
+            }
+        }
+
+
         //calling method whether is com or odbc
         if (env('DB2_DRIVER')!="" && method_exists($this, strtolower(env('DB2_DRIVER')))){
             $method = strtolower(env('DB2_DRIVER'));
