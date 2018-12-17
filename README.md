@@ -26,14 +26,16 @@ DB2_PASSWORD=pass_com
 ```
 
 if you have multiple env ODBC
-```DB2_DRIVER=ODBC
+```
+DB2_DRIVER=ODBC
 DB2_CATALOG=
 DB2_HOST=192.168.x.xx|192.168.xx.xxx
 DB2_USERNAME=user1|user2
 DB2_PASSWORD=pass1|pass2
 ```
 if you have multiple env COM
-```DB2_DRIVER=COM
+```
+DB2_DRIVER=COM
 DB2_CATALOG=S651658X|S651658Y
 DB2_HOST=192.168.x.xx|192.168.xx.xxx
 DB2_USERNAME=user1|user2
