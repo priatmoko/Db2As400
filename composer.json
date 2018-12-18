@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Masterpis\\Db2as400\\": "src"
+            "masterpis\\db2as400\\": "src"
         }
     }
 }
