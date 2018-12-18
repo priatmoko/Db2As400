@@ -149,7 +149,17 @@ $mmusid->get()
  * @return false
  */
 $mmusid->first()
+
+/**
+ * @param array filter
+ * @return int 
+ */
+// generate select count(*) from xxx
+$mmusid->count($filter=NULL)
+
     ```
+    
+    
 > Compability
 You have to install driver COM or ODBC to make it run.
 If you have iSeries packages like iSeries Navigator, you can install it, the driver automatically installed
