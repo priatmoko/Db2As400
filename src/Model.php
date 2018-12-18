@@ -82,15 +82,14 @@ class Model extends Db2
      * @param array
      * @return void 
      */
-    public function like($like){
-
+    public function like($like)
+    {
         if (is_array($this->like) && count($this->like)>0){
             $used_like=array_merge($like, $this->like);
         }else{
             $used_like = $like;
         }
         $this->like=$used_like;
-
     }
 
     /**
@@ -98,7 +97,8 @@ class Model extends Db2
      * @param array
      * @return void
      */
-    public function orderBy($order){
+    public function orderBy($order)
+    {
         $this->order = $order;
     }
 
@@ -107,7 +107,8 @@ class Model extends Db2
      * @param int
      * @return void
      */
-    public function limit($limit){
+    public function limit($limit)
+    {
         $this->limit=$limit;
     }
 
@@ -116,7 +117,8 @@ class Model extends Db2
      * @param int
      * @return void
      */
-    public function setServer($server){
+    public function setServer($server)
+    {
         $this->server=$server;
     }
 
@@ -126,7 +128,8 @@ class Model extends Db2
      * @param @array
      * @return void
      */
-    public function setFields($fields){
+    public function setFields($fields)
+    {
         $this->fields = $fields;
     }
 
@@ -135,7 +138,8 @@ class Model extends Db2
      * @param string
      * @return void
      */
-    public function setUser($user){
+    public function setUser($user)
+    {
         $this->user=$user;
     }
 
@@ -151,46 +155,11 @@ class Model extends Db2
      */
     public function where($where=NULL, $console=NULL)
     {
-        if ($where!=NULL){
-            //Looping array clause where
-            foreach($where as $k=>$v) {
-                //Validate index array clause. If index array is empty, We use all value as clause. 
-                //It is complex clause. if index array is not empty, It is simple clause. 
-                if ($k=="") $pf[] = $v; else $pf[] = $k."='".str_replace("'","''", $v)."'";
-            }
-        }
-
-        //Looping like clause
-        if (is_array($this->like) && count($this->like)>0){
-            foreach($this->like as $lk=>$lv) {
-                //Validate index array clause. If index array is empty, We use all value as clause. 
-                //It is complex clause. 
-                //if index array is not empty, It is simple clause.
-                if ($lk=="") $pf[] = $v; else $pf[] = $lk." like '".str_replace("'","''", $lv)."'";
-            }
-        }
-        
-        //Combine all filter 
-        $filter = "";
-        if (isset($pf) && count($pf)>0)  $filter = " where ".implode(" and ", $pf); 
-        
-        //Looping array order clause
-        $order = "";
-        if (is_array($this->order) && count($this->order)>0){
-            
-            $orders = $this->order;
-            foreach($orders as $ok=>$ov) $porder[] = $ok." ".$ov." ";
-
-            if (isset($porder) && is_array($porder) && count($porder)>0)
-                $order = "order by ".implode(",", $porder); else $order ="";
-        
-        }
-
-        //validate param limit
-        $limit = "";
-        if (isset($this->limit) && $this->limit>0) 
-            $limit = "fetch first ".$this->limit." rows only";
-        
+        //generate where clause
+        $r=$this->filter($where);
+        $filter = $r['filter'];
+        $order = $r['order'];
+        $limit = $r['limit'];
         //validate field selected    
         $fields = "*";
         if (is_array($this->fields) && count($this->fields)>0) 
@@ -206,6 +175,72 @@ class Model extends Db2
         }else{
             $this->query($sql);
         }
+    }
+
+    /**
+     * @param array where
+     * @return int 
+     */
+
+    public function count($where=NULL)
+    {
+        //generate where clause
+        $r=$this->filter($where);
+        $filter = $r['filter'];
+        $sql = "select count(*) as counted from ".$this->table." ".$filter;
+        $this->query($sql);
+        $result=$this->first();
+        return $result['COUNTED'];
+    }
+
+    /**
+     * @param array $filter
+     * @return array
+     * generate clause query
+     */
+    private function filter($filter=NULL)
+    {
+        if ($filter!=NULL)
+        {
+            //Looping array clause where
+            foreach($filter as $k=>$v) 
+            {   //Validate index array clause. If index array is empty, We use all value as clause. 
+                //It is complex clause. if index array is not empty, It is simple clause. 
+                if ($k=="") $pf[] = $v; else $pf[] = $k."='".str_replace("'","''", $v)."'";
+            }
+        }
+        //Looping like clause
+        if (is_array($this->like) && count($this->like)>0)
+        {
+            foreach($this->like as $lk=>$lv) 
+            {   //Validate index array clause. If index array is empty, We use all value as clause. 
+                //It is complex clause. if index array is not empty, It is simple clause.
+                if ($lk=="") $pf[] = $v; else $pf[] = $lk." like '".str_replace("'","''", $lv)."'";
+            }
+        }
+        //Combine all filter 
+        $filters = "";
+        if (isset($pf) && count($pf)>0)  $filters = " where ".implode(" and ", $pf);
+        //Looping array order clause
+        $order = "";
+        if (is_array($this->order) && count($this->order)>0)
+        {
+            $orders = $this->order;
+            foreach($orders as $ok=>$ov) 
+                $porder[] = $ok." ".$ov." ";
+            if (isset($porder) && is_array($porder) && count($porder)>0)
+                $order = "order by ".implode(",", $porder); else $order ="";
+        
+        }
+        //validate param limit
+        $limit = "";
+        if (isset($this->limit) && $this->limit>0) 
+            $limit = "fetch first ".$this->limit." rows only";
+
+        return ['filter'=>$filters,
+                'order'=>$order,
+                'limit'=>$limit];
+
     }
 
 }
