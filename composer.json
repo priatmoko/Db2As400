@@ -1,5 +1,5 @@
 {
-    "name": "masterpis/db2as400",
+    "name": "Masterpis/Db2as400",
     "description": "Package for db2 as400 connection. Connection based on general connection string com and odbc",
     "type": "library",
     "license": "MIT",
@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Masterpis\\Db2As400\\": "src"
+            "Masterpis\\Db2as400\\": "src"
         }
     }
 }
