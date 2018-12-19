@@ -10,7 +10,6 @@
             "email": "priatmoko.informatics@gmail.com"
         }
     ],
-    "minimum-stability": "v1.0.6",
     "require": {
         "php": "^7.1"
     },
