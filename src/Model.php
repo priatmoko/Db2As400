@@ -243,4 +243,48 @@ class Model extends Db2
 
     }
 
+    /**
+     * @var array $values 
+     * return void 
+     */
+    public function insert($values, $console=NULL)
+    {
+        if (is_array($values) && count($values)>0){
+            
+            foreach($values as $f => $value) 
+            {
+                $fields[] = $f;
+                if (empty($value))
+                {
+                    $v[]="NULL";
+                }else
+                {
+                    if (isset($value) && !is_array($value) && $value!="")
+                    {
+                        $v[]="'".str_replace("'","''",$value)."'";
+                    }
+                    else if (is_array($value) && count($value)>0)
+                    {
+                        $v[]=($value[0]=="0"?$value[0]:($value[0]==""?"''":"(".$value[0].")"));    
+                    }else
+                    {
+                        $v[]="NULL";
+                    }
+                }
+            }
+            if (isset($v) && is_array($v) && count($v)>0)
+            {
+                $sql = "insert into ".$this->table." 
+                        (".implode(",",$fields).")
+                    values (".implode(",", $v).")";
+                if (strtoupper($console)=='CONSOLE')
+                {
+                    dd($sql);
+                }else
+                {
+                    //$this->query($sql);                   
+                }    
+            }
+        }
+    }
 }
