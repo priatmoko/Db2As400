@@ -1,6 +1,7 @@
 {
     "name": "masterpis/db2as400",
-    "description": "Package for db2 as400 connection. Connection based on general connection string com and odbc",
+    "description": "Packages for Db2 As400 connection. Connection based on general connection string COM and ODBC",
+    "keywords": ["db2", "as400", "connection", "query", "ODBC", "COM"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -9,13 +10,12 @@
             "email": "priatmoko.informatics@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
-        "php": ">=7.1"
+        "php": "^7.1"
     },
     "autoload": {
         "psr-4": {
-            "Masterpis\\Db2As400\\": "src"
+            "Masterpis\\Db2as400\\": "src/"
         }
     }
 }
