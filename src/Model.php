@@ -244,13 +244,15 @@ class Model extends Db2
     }
 
     /**
-     * @var array $values 
+     * @var array $values
+     * @var string $console 
      * return void 
      */
     public function insert($values, $console=NULL)
     {
         if (is_array($values) && count($values)>0){
             
+            //mapping array key and value to generate query insert
             foreach($values as $f => $value) 
             {
                 $fields[] = $f;
@@ -265,6 +267,8 @@ class Model extends Db2
                     }
                     else if (is_array($value) && count($value)>0)
                     {
+                        //saving zero (0) and empty string ("") need exception to avoid validation 
+                        //(converting to null value)
                         $v[]=($value[0]=="0"?$value[0]:($value[0]==""?"''":"(".$value[0].")"));    
                     }else
                     {
@@ -274,17 +278,45 @@ class Model extends Db2
             }
             if (isset($v) && is_array($v) && count($v)>0)
             {
+                //generate last query
                 $sql = "insert into ".$this->table." 
                         (".implode(",",$fields).")
                     values (".implode(",", $v).")";
+
                 if (strtoupper($console)=='CONSOLE')
                 {
+                    //console generated query
                     dd($sql);
                 }else
                 {
-                    //$this->query($sql);                   
+                    //running query
+                    $this->query($sql);                   
                 }    
             }
+        }
+    }
+
+    /**
+     * @var array $filter=NULL
+     * @var string $console=NULL
+     * @return void
+     */
+    public function delete($filter=NULL, $console=NULL)
+    {
+        //generate where clause
+        $r=$this->filter($filter);
+        $where = (isset($r['filter'])?$r['filter']:"");
+        $sql = "delete from ".$this->table." ".$where;
+        
+        //choose the operation, the default is executing query
+        if (strtoupper($console)=='CONSOLE')
+        {
+            //console generated query
+            dd($sql);
+        }else
+        {
+            //running query
+            $this->query($sql);                   
         }
     }
 }
