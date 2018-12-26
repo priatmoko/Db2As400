@@ -157,6 +157,22 @@ $mmusid->first()
 // generate select count(*) from xxx
 $mmusid->count($filter=NULL)
 
+// Generate insert into query
+/**
+* @var array $person
+* @var string $console=NULL
+* return void 
+*/
+$mmusid=>insert($person)
+
+//Generate delete query
+/**
+* @var array $filter=NULL
+* @var string $console=NULL
+* @return void
+*/
+$mmusid->delete($filter) 
+
     ```
     
     
