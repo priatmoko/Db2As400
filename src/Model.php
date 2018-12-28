@@ -319,4 +319,53 @@ class Model extends Db2
             $this->query($sql);                   
         }
     }
+    
+    /**
+     * @var array $filter
+     * @var string $console=NULL
+     * @return void
+     */
+    public function update($person, $filter, $console=NULL)
+    {
+        //generate where clause
+        $r=$this->filter($filter);
+        $where = (isset($r['filter'])?$r['filter']:"");
+
+        //set up updated value
+        foreach($person as $k=>$v)
+        {
+            if (empty($v))
+            {
+                //if value is empty, set up value to NULL
+                $values[] = $k."=NULL";
+            }else if (!is_array($v) && $v!="")
+            {
+                //if value is string and not empty, set value as updated value
+                $values[]=$k."='".str_replace("'","''", $v)."'";
+            }else if (is_array($v) && count($v)>0)
+            {
+                //saving zero (0) and empty string ("") need exception to avoid validation 
+                //(converting to null value)
+                $values[]=$k."=".($value[0]=="0"?$value[0]:($value[0]==""?"''":"(".$value[0].")"));
+            } 
+        }
+
+        //validate filter and updated value
+        if (isset($values) && isset($where) && is_array($values) && $where != "")
+        {
+            //generate update query
+            $sql="update ".$this->table." set ".implode(",", $values)." where ".$where;
+
+            //choose the operation
+            if (strtoupper($console)=='CONSOLE')
+            {
+                //console generated query
+                dd($sql);
+            }else
+            {
+                //running query
+                $this->query($sql);                   
+            }
+        }
+    }
 }
