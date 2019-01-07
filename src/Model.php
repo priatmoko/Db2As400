@@ -253,30 +253,14 @@ class Model extends Db2
         if (is_array($values) && count($values)>0){
             
             //mapping array key and value to generate query insert
-            foreach($values as $f => $value) 
-            {
-                $fields[] = $f;
-                if (empty($value))
-                {
-                    $v[]="NULL";
-                }else
-                {
-                    if (isset($value) && !is_array($value) && $value!="")
-                    {
-                        $v[]="'".str_replace("'","''",$value)."'";
-                    }
-                    else if (is_array($value) && count($value)>0)
-                    {
-                        //saving zero (0) and empty string ("") need exception to avoid validation 
-                        //(converting to null value)
-                        $v[]=($value[0]=="0"?$value[0]:($value[0]==""?"''":"(".$value[0].")"));    
-                    }else
-                    {
-                        $v[]="NULL";
-                    }
-                }
-            }
-            if (isset($v) && is_array($v) && count($v)>0)
+            $loop = $this->loopFields($values);
+            //formatted value
+            $v = $loop['v'];
+            //formatted fields
+            $fields = $loop['field'];
+            
+            //generate query
+            if (is_array($v) && count($v)>0 && is_array($fields) && count($fields)>0)
             {
                 //generate last query
                 $sql = "insert into ".$this->table." 
@@ -294,6 +278,100 @@ class Model extends Db2
                 }    
             }
         }
+    }
+
+    /**
+     * @var array $records
+     * @var string $console
+     * return void
+     */
+    private function executeBatch($fields, $val, $console)
+    {
+        if (strtoupper($console)=='CONSOLE')
+        {
+            $value= implode(",", $val);
+            $sql = "insert into ".$this->table." 
+                        (".implode(",",$fields).")
+                    values ".$value;
+            dd($sql);        
+        }else{
+
+            //execute splitted records every 10 records
+            if (count($val)>10)
+            {
+                //execution for more than 10 records
+                $chunkedRecords = array_chunk($val, 10);
+                foreach($chunkedRecords as $record)
+                {
+                    //$value[]= implode(",", $record);
+                    $sql = "insert into ".$this->table." 
+                                        (".implode(",",$fields).")
+                                    values ".implode(",", $record);
+                    $this->query($sql);                
+                }
+
+                // if (isset($value) && count($value)>0){
+                //     foreach($value as $vuse){
+                //         $sql = "insert into ".$this->table." 
+                //                         (".implode(",",$fields).")
+                //                     values ".$vuse;
+                                    
+                //     }
+                // }
+            }else
+            {
+                //execution for more than 10 records
+                $value= implode(",", $val);
+                $sql="insert into ".$this->table." 
+                            (".implode(",",$fields).")
+                        values ".$value; 
+                $this->query($sql);        
+            }    
+        }
+    }
+
+
+    /**
+     * @var array $values
+     * @var string $console 
+     * return void 
+     */
+    public function insertBatch($values, $console=NULL)
+    {
+        //validate multiple array of records
+        if (is_array($values))
+        {
+            //looping records
+            foreach ($values as $value)
+            {
+                //looping field from each record
+                $loop = $this->loopFields($values);
+                //formatted value
+                $v = $loop['v'];
+                //formatted fields
+                $field = $loop['field'];
+
+                //generate record into values query
+                if (is_array($v) && count($v) > 0)
+                    $val[] = "(".implode(",",$v).")";
+
+                //generate fields query
+                if (is_array($v) && count($v) > 0 && !isset($fields))
+                    $fields = "(".implode(",",$field).")";
+                
+                unset($v);
+                unset($field);
+                
+            }
+
+            //validate value
+            if (isset($val) && is_array($val) && count($val)>0)
+                //calling method for executing batch
+                $this->executeBatch($fields, $val, $console);
+        }
+
+        return false;
+
     }
 
     /**
@@ -320,6 +398,40 @@ class Model extends Db2
         }
     }
     
+    /**
+     * @var array $fields
+     * @return array formatted array fields
+     */
+    private function loopFields($fields)
+    {
+        if (is_array($fields) && count($fields)>0){
+            foreach($fields as $f => $value) 
+            {
+                $fields[] = $f;
+                if (empty($value))
+                {
+                    $v[]="NULL";
+                }else
+                {
+                    if (isset($value) && !is_array($value) && $value!="")
+                    {
+                        $v[]="'".str_replace("'","''",$value)."'";
+                    }
+                    else if (is_array($value) && count($value)>0)
+                    {
+                        //saving zero (0) and empty string ("") need exception to avoid validation 
+                        //(converting to null value)
+                        $v[]=($value[0]=="0"?$value[0]:($value[0]==""?"''":"(".$value[0].")"));    
+                    }else
+                    {
+                        $v[]="NULL";
+                    }
+                }
+            }
+            return ['v'=>$v, 'field'=>$fields];
+        }
+        return false;
+    }
     /**
      * @var array $filter
      * @var string $console=NULL
