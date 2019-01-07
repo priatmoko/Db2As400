@@ -303,24 +303,15 @@ class Model extends Db2
                 $chunkedRecords = array_chunk($val, 10);
                 foreach($chunkedRecords as $record)
                 {
-                    //$value[]= implode(",", $record);
                     $sql = "insert into ".$this->table." 
                                         (".implode(",",$fields).")
                                     values ".implode(",", $record);
                     $this->query($sql);                
                 }
-
-                // if (isset($value) && count($value)>0){
-                //     foreach($value as $vuse){
-                //         $sql = "insert into ".$this->table." 
-                //                         (".implode(",",$fields).")
-                //                     values ".$vuse;
-                                    
-                //     }
-                // }
+            
             }else
             {
-                //execution for more than 10 records
+                //execution for less than 10 records
                 $value= implode(",", $val);
                 $sql="insert into ".$this->table." 
                             (".implode(",",$fields).")
